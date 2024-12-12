@@ -1,0 +1,59 @@
+parameters:
+- name: preset
+  type: string
+- name: cmakeArgs
+  type: string
+  default: ''
+
+steps:
+- task: NuGetCommand@2
+  displayName: "Configure API Key"
+  inputs:
+    command: 'custom'
+    arguments: setapikey "AzureDevops" -source $(VCPKG_NUGET)
+
+- task: NuGetAuthenticate@1
+  displayName: "Autheticate to Artifact Feed"
+
+- task: CMake@1
+  displayName: "Configure All"
+  inputs:
+    workingDirectory: '.' 
+    cmakeArgs: --preset ${{ parameters.preset }} -DCMAKE_TOOLCHAIN_FILE=$(VCPKG_INSTALLATION_ROOT)/scripts/buildsystems/vcpkg.cmake -B$(Build.BinariesDirectory) ${{ parameters.cmakeArgs }}
+
+- task: CMake@1
+  displayName: "Build All"
+  inputs:
+    workingDirectory: '.' 
+    cmakeArgs: --build $(Build.BinariesDirectory) 
+
+- bash: find $(Build.BinariesDirectory) -executable -name "*test" -type f -execdir ./'{}' ';'
+  displayName: "Test All (Linux)"
+  condition: eq( variables['Agent.OS'], 'Linux' )
+
+- pwsh: |
+    $binaries = Get-ChildItem $(Build.BinariesDirectory) -Recurse -Filter *test.exe
+    foreach($binary in $binaries)
+    {
+      cd $binary.DirectoryName
+      & $binary.FullName
+    }
+  displayName: "Test All (Windows)"
+  condition: eq( variables['Agent.OS'], 'Windows_NT' )
+
+- task: PublishTestResults@2
+  displayName: "Publish Test Results"
+  inputs:
+    testResultsFormat: 'JUnit'
+    testResultsFiles: '$(Build.BinariesDirectory)/**/*TEST-*.xml' 
+
+    
+- task: CMake@1 
+  displayName: "Install All"
+  inputs:
+    workingDirectory: '.' 
+    cmakeArgs: --install $(Build.BinariesDirectory) --prefix $(Build.ArtifactStagingDirectory) 
+
+- publish: '$(Build.ArtifactStagingDirectory)'
+  displayName: 'Publish Build Artifacts'
+  artifact: $(Agent.JobName)

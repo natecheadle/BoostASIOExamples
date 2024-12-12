@@ -1,0 +1,10 @@
+parameters:
+- name: dependencies
+  type: string
+  default: ''
+
+steps:
+- script: |
+    sudo apt update
+    sudo apt install ${{ parameters.dependencies }}
+  displayName: "Install Dependencies"
