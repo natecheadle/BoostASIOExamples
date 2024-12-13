@@ -14,17 +14,3 @@ add_executable(${PROJECT_NAME} "main.cpp")
 target_link_libraries(${PROJECT_NAME} PRIVATE Boost::asio 
                                               fmt::fmt)
 copy_dlls(${PROJECT_NAME})
-
-if(WIN32)
-  install(
-    TARGETS ${PROJECT_NAME}
-    RUNTIME DESTINATION bin
-    LIBRARY DESTINATION lib
-    ARCHIVE DESTINATION bin)
-else()
-  install(
-    TARGETS ${PROJECT_NAME}
-    RUNTIME DESTINATION bin
-    LIBRARY DESTINATION lib
-    ARCHIVE DESTINATION lib)
-endif()
