@@ -1,8 +1,6 @@
 #include <fmt/printf.h>
 
 #include <boost/asio.hpp>
-#include <boost/atomic.hpp>
-#include <boost/bind/bind.hpp>
 
 class MultiTimer {
   boost::asio::io_context m_Context;
