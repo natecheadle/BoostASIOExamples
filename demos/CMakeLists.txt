@@ -4,3 +4,4 @@ set(CMAKE_CXX_STANDARD 20)
 
 add_subdirectory("timers")
 add_subdirectory("executors")
+add_subdirectory("network")
