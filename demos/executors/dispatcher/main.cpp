@@ -41,7 +41,7 @@ class Dispatcher {
   static void timeout(const boost::system::error_code& ec,
                       boost::asio::steady_timer* timer, std::function<void()> f,
                       boost::asio::chrono::milliseconds duration) {
-    if (!ec.failed()) {
+    if (!ec) {
       f();
       timer->expires_at(timer->expiry() + duration);
       timer->async_wait([timer, f = std::move(f), duration](
